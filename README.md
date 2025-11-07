@@ -39,7 +39,6 @@ uma-bot
 ├── login.py
 ├── scrap.py
 ├── extract.py
-├── main.py
 ├── data/
 │   ├── pre.txt
 │   ├── corrent.txt
