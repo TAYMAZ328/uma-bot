@@ -1,0 +1,5 @@
+pyrogram
+mysql-connector-python
+bs4
+selenium
+apscheduler
