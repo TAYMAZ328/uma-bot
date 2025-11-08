@@ -1,17 +1,23 @@
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-import time, csv
+from selenium.webdriver.chrome.options import Options
+import time, csv, os
 
 def get_login():
-    with open("files\\tokens.csv", "r") as f:
+    with open(os.path.join("files", "tokens.csv"), "r") as f:
         c = csv.reader(f)
         c = list(c)[1]
         return c[0].strip(), c[1].strip()
 
 def get_cap():
     # Open browser
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
     global driver
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=options)
     driver.get("https://taghzieh.uma.ac.ir")
     time.sleep(10)
     driver.find_element(By.ID, "captcha-image")
