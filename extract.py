@@ -1,4 +1,4 @@
-import re
+import re, os
 
 def clean(src):
     src = str(src)
@@ -104,11 +104,11 @@ def extract(src):
 
 
 def write(string, week):
-    with open(f"data\\{week}.txt", 'w', encoding="utf-8") as f:
+    with open(os.path.join("data", f"{week}.txt"), 'w', encoding="utf-8") as f:
         f.write(string)
 
 def read(week):
-    with open(f"data\\{week}.txt", 'r', encoding='utf-8') as f:
+    with open(os.path.join("data", f"{week}.txt"), 'r', encoding='utf-8') as f:
         src = f.read()
     return src
 

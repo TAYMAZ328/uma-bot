@@ -1,6 +1,6 @@
 from mysql.connector import connect, Error
 from datetime import datetime
-import csv, logging
+import csv, logging, os
 
 
 class DB:
@@ -66,7 +66,7 @@ class DB:
         try:
             users = list(map(lambda a: list(a), self.cur.fetchall()))
             users = sorted(users, key=lambda a: a[3])
-            with open("files\\admins.csv", 'w', newline='', encoding='utf-8') as f:
+            with open(os.path.join("files", "admins.csv"), 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(["ID", "Name", "Username", "Promotion_Date"])
                 writer.writerows(users)
@@ -83,7 +83,7 @@ class DB:
             self.cur.execute("SELECT id, access_hash, name, username, date FROM users")
             users = list(map(lambda a: list(a), self.cur.fetchall()))
             users = sorted(users, key=lambda a: a[4])
-            with open("files\\users.csv", 'w', newline='', encoding='utf-8') as f:
+            with open(os.path.join("files", "users.csv"), 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(["ID", "Access Hash", "Name", "Username", "Date"])
                 writer.writerows(users)
@@ -105,7 +105,7 @@ class DB:
             self.cur.execute("SELECT id, name, username, banned_date FROM ban_list")
             users = list(map(lambda a: list(a), self.cur.fetchall()))
             users = sorted(users, key=lambda a: a[3])
-            with open("files\\banned_users.csv", 'w', newline='', encoding='utf-8') as f:
+            with open(os.path.join("files", "banned_users.csv"), 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(["ID", "Name", "Username", "Banned_Date"])
                 writer.writerows(users)
@@ -177,7 +177,7 @@ class DB:
         
     def log_error(self, error):
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open("errors.log", "a") as f:
+        with open(os.path.join("files", "errors.log"), "a") as f:
             f.write(f"[{date}]\n{error}\n")
         logging.error(error)
     
@@ -186,7 +186,7 @@ class DB:
 
 
 def get_db():
-    with open("files\\tokens.csv", "r") as f:
+    with open(os.path.join("files", "tokens.csv"), "r") as f:
         c = csv.reader(f)
         c = list(c)[2]
         return c[0].strip(), c[1].strip(), c[2].strip(), c[3].strip()

@@ -1,20 +1,22 @@
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ReplyKeyboardMarkup
 from pyrogram.errors import MessageNotModified
 from pyrogram import Client, filters
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
-import csv, logging, asyncio
+import csv, logging, asyncio, os
+
 import extract, login, scrap, database
 
 
 def get_token():
-    with open("files\\tokens.csv", "r") as f:
+    with open(os.path.join("files", "tokens.csv"), "r") as f:
         c = csv.reader(f)
         c = list(c)[0]
         return c[0].strip(), c[1].strip(), int(c[2])
 
 def get_db():
-    with open("files\\tokens.csv", "r") as f:
+    with open(os.path.join("files", "tokens.csv"), "r") as f:
         c = csv.reader(f)
         c = list(c)[2]
         return c[0].strip(), c[1].strip(), c[2].strip(), c[3].strip()
@@ -195,7 +197,7 @@ async def banned_users(client, message: Message):
     log_command(message)
 
     bans_num = db.select_bans()
-    await message.reply_document("files\\banned_users.csv", caption=f"[ {bans_num} ] Users have been Banned")
+    await message.reply_document(os.path.join("files", "banned_users.csv"), caption=f"[ {bans_num} ] Users have been Banned")
 
 @app.on_message(filters.command("users"))
 async def all_user_info(client, message: Message):
@@ -203,7 +205,7 @@ async def all_user_info(client, message: Message):
     log_command(message)
 
     users_num = db.select_users()
-    await message.reply_document("files\\users.csv", caption=f"[ {users_num} ] Users have been registered so far")
+    await message.reply_document(os.path.join("files", "users.csv"), caption=f"[ {users_num} ] Users have been registered so far")
 
 @app.on_message(filters.command("admins"))
 async def admins(client, message: Message):
@@ -211,7 +213,7 @@ async def admins(client, message: Message):
     log_command(message)
 
     admins_num = db.select_admins()
-    await message.reply_document("files\\admins.csv", caption=f"[ {admins_num} ] Admins have been promoted so far")
+    await message.reply_document(os.path.join("files", "admins.csv"), caption=f"[ {admins_num} ] Admins have been promoted so far")
 
 
 @app.on_message(filters.command("user"))
@@ -368,13 +370,13 @@ def log_command(message):
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     user = message.from_user
     text = message.text
-    with open("files\\commands.log", "a", encoding="utf-8") as f:
+    with open(os.path.join("files", "commands.log"), "a", encoding="utf-8") as f:
         f.write(f"[{date}]\nUser: {user.first_name + (user.last_name or ' ')}, {user.id}\n{text}\n\n")
     logging.info(text)
 
 def log_error(error):
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open("files\\errors.log", "a", encoding="utf-8") as f:
+    with open(os.path.join("files", "errors.log"), "a", encoding="utf-8") as f:
         f.write(f"[{date}]\n{error}\n")
     logging.error(error)
 
