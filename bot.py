@@ -121,6 +121,7 @@ async def direct(client, message: Message):
         return
     try:
         await msg.copy(chat_id=user_id)
+        await message.reply_text("Sent")
     except Exception as e:
         await message.reply_text(f"Failed sending message to user {user_id}: {e}")
         log_error(f"Failed sending message to user {user_id}: {e}")
@@ -152,7 +153,6 @@ async def broadcast(client, message: Message):
             await asyncio.sleep(0.5)
         except Exception as e:
             log_error(f"Failed sending message to user {user}: {e}")
-
     await message.edit_text("Broadcast complete")
 
 
@@ -302,6 +302,20 @@ async def add_admin(client, message: Message):
             await message.reply_text("User not in Admin list")
 
 
+async def none_cmd_msg(client, message):
+    admins = db.admins_list()
+    own = admins[0]
+    try:
+        user_id = message.from_user.id
+        if int(user_id) in admins: return
+        user = await client.get_users(user_id)
+        await message.forward(chat_id=own)
+        await client.send_message(chat_id=own, text=f"User: `{user.first_name} {user.last_name or ' '}`\nID: `{user.id}`\nUsername: {f"@{user.username}" if user.username else f"[{user.first_name}](tg://user?id={user.id})"}\n")
+    except Exception as e:
+        await client.send_message(chat_id=own, text=f"Failed sending message from user {user_id}: {e}")
+        log_error(f"Failed sending message from user {user_id}: {e}")
+
+
 async def show_menu(client, message: Message, week="corrent"):
 
     key_menu = InlineKeyboardMarkup([
@@ -326,26 +340,32 @@ async def show_menu(client, message: Message, week="corrent"):
     except MessageNotModified:
         pass
 
-@app.on_message(filters.text & filters.private)
+
+@app.on_message(filters.private)
 async def res(client, message: Message):
     if not auth(message, "user"): return
     log_command(message)
 
-    text = message.text
-    match text:
-        case "مشاهده منوی سلف":
-            await show_cnt(client, message)
-            await show_keyboard(client, message, role='menu')
-        case "ثبت نظر":
-            await message.reply_text("درحال توسعه...")
-        case "اطلاعات استاد ها":
-            await message.reply_text("درحال توسعه...")
-        case "جزوات و منابع درسی":
-            await message.reply_text("درحال توسعه...")
-        case "راهنما":
-            await message.reply_text("درحال توسعه...")
-        case 'بازگشت':
-            await show_keyboard(client, message, role='back')
+    if message.text:
+        match message.text:
+            case "مشاهده منوی سلف":
+                await show_cnt(client, message)
+                await show_keyboard(client, message, role='menu')
+            case "ثبت نظر":
+                await message.reply_text("درحال توسعه...")
+            case "اطلاعات استاد ها":
+                await message.reply_text("درحال توسعه...")
+            case "جزوات و منابع درسی":
+                await message.reply_text("درحال توسعه...")
+            case "راهنما":
+                await message.reply_text("درحال توسعه...")
+            case 'بازگشت':
+                await show_keyboard(client, message, role='back')
+            case _:
+                await none_cmd_msg(client, message)
+    else:
+        await none_cmd_msg(client, message)
+
 
 @app.on_callback_query()
 async def handle_callback(client, callback_query: CallbackQuery):
