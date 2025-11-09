@@ -31,8 +31,8 @@ def auth(message, role='admin'):
         admins = db.admins_list()
         if user_id not in admins:
             return False
-    
     return True
+
 
 HOST, USERNAME, PASSWORD, DB_NAME = get_db()
 db = database.DB(host=HOST, username=USERNAME, password=PASSWORD, db_name=DB_NAME)
@@ -97,7 +97,41 @@ async def help(client, message: Message):
 /unban [user ID] Unban User
 /update  Update menu
 /broadcast send message to all users
+/direct send direct message to a user
 /help""")
+
+
+@app.on_message(filters.command("direct"))
+async def direct(client, message: Message):
+    if not auth(message): return
+    log_command(message)
+
+    msg = message.reply_to_message
+    if not msg:
+        await message.reply_text("No message selected")
+        return
+
+    if len(message.command) != 2:
+        await message.reply_text("Invalid command")
+        return
+    
+    user_id = int(message.command[1])
+    if user_id not in db.users_list():
+        await message.reply_text("User has never started the bot")
+        return
+    try:
+        await msg.copy(chat_id=user_id)
+    except Exception as e:
+        await message.reply_text(f"Failed sending message to user {user_id}: {e}")
+        log_error(f"Failed sending message to user {user_id}: {e}")
+
+
+@app.on_message(filters.command("kill"))
+async def shutdown(client, message: Message):
+    if not auth(message): return
+    log_command(message)
+    await message.reply_text("Force shutdown...")
+    os._exit(0)
 
 
 @app.on_message(filters.command("broadcast"))
@@ -388,7 +422,7 @@ async def setup_scheduler():
         broadcast_res,
         trigger='cron',
         day_of_week='thu',
-        hour=23,
+        hour=22,
         minute=0,
         timezone='Asia/Tehran'
     )
