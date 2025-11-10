@@ -250,6 +250,26 @@ async def admins(client, message: Message):
     await message.reply_document(os.path.join("files", "admins.csv"), caption=f"[ {admins_num} ] Admins have been promoted so far")
 
 
+@app.on_message(filters.command("logs"))
+async def user_info(client, message: Message):
+    if not auth(message): return
+    log_command(message)
+
+    if len(message.command) == 1:
+        await message.reply_document(os.path.join("files", "commands.log"), caption=f"All logs")
+
+    elif len(message.command) == 2:
+        num = int(message.command[1]) * 4
+
+        with open(os.path.join("files", "commands.log"), 'r', encoding="utf-8") as f:
+            c = f.readlines()[-num:]
+
+        with open(os.path.join("files", "cmds.txt"), 'w', encoding="utf-8") as f:
+            f.writelines(c)
+    
+        await message.reply_document(os.path.join("files", "cmds.txt"), caption=f"[ {num} ] lones of log")
+
+
 @app.on_message(filters.command("user"))
 async def user_info(client, message: Message):
     if not auth(message): return
@@ -270,6 +290,7 @@ async def user_info(client, message: Message):
     except Exception as e:
         await message.reply_text("User has never started the bot")
         log_error(f"User info Error: {e}")
+
 
 @app.on_message(filters.command("admin"))
 async def add_admin(client, message: Message):
@@ -310,7 +331,7 @@ async def none_cmd_msg(client, message):
         if int(user_id) in admins: return
         user = await client.get_users(user_id)
         await message.forward(chat_id=own)
-        await client.send_message(chat_id=own, text=f"User: `{user.first_name} {user.last_name or ' '}`\nID: `{user.id}`\nUsername: {f"@{user.username}" if user.username else f"[{user.first_name}](tg://user?id={user.id})"}\n")
+        await client.send_message(chat_id=own, text=f"User: `{user.first_name} {user.last_name or ' '}`\nID: `{user.id}`\nUsername: {f"@{user.username}" if user.username else f"[{user.first_name}](tg://user?id={user.id})"}\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
     except Exception as e:
         await client.send_message(chat_id=own, text=f"Failed sending message from user {user_id}: {e}")
         log_error(f"Failed sending message from user {user_id}: {e}")
