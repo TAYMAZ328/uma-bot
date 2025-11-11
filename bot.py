@@ -13,7 +13,7 @@ def get_token():
     with open(os.path.join("files", "tokens.csv"), "r") as f:
         c = csv.reader(f)
         c = list(c)[0]
-        return c[0].strip(), c[1].strip(), int(c[2])
+        return c[0].strip(), c[1].strip(), int(c[2]), int(c[3])
 
 def get_db():
     with open(os.path.join("files", "tokens.csv"), "r") as f:
@@ -42,7 +42,7 @@ menu = extract.Menu()
 menu.update()
 
 
-TOKEN, HASH, ID = get_token()
+TOKEN, HASH, ID, OWNER = get_token()
 app = Client('uma_bot', bot_token=TOKEN, api_id=ID, api_hash=HASH)
 
 
@@ -98,6 +98,7 @@ async def help(client, message: Message):
 /update  Update menu
 /broadcast send message to all users
 /direct send direct message to a user
+/logs [Null/ number of logs] Export logs
 /help""")
 
 
@@ -214,7 +215,7 @@ async def ban_user(client, message: Message):
         return
 
     user_id = int(message.command[1])
-    if user_id in db.admins_list():
+    if user_id in db.admins_list() or user_id == OWNER:
         await message.reply_text("The User is Admin")
         return
 
@@ -303,37 +304,40 @@ async def add_admin(client, message: Message):
 
     admin_id = int(message.command[2])
     if message.command[1] == '1':
-        if admin_id not in db.admins_list():
-            state = db.insert_admin(admin_id)
-            if state:
-                await message.reply_text("User added to Admins.")
-            else:
-                await message.reply_text("User has never started the bot")
-        else:
+        if admin_id in db.admins_list():
             await message.reply_text("User is already an Admin")
 
+        else:
+            state = db.insert_admin(admin_id)
+            if state:
+                await message.reply_text("User added to Admins")
+            else:
+                await message.reply_text("User has never started the bot")
+
     elif message.command[1] == '0':
+        if admin_id == OWNER:
+            await message.reply_text("Permission Denied")
+            return
+
         if admin_id in db.admins_list():
             state = db.del_admin(admin_id)
             if state:
-                await message.reply_text("Admin dismissed successfully.")
+                await message.reply_text("Admin dismissed successfully")
             else:
-                await message.reply_text("No admin dismissed — ID not found.")
+                await message.reply_text("No admin dismissed — ID not found")
         else:
             await message.reply_text("User not in Admin list")
 
 
 async def none_cmd_msg(client, message):
-    admins = db.admins_list()
-    own = admins[0]
     try:
         user_id = message.from_user.id
-        if int(user_id) in admins: return
+        if int(user_id) == OWNER: return
         user = await client.get_users(user_id)
-        await message.forward(chat_id=own)
-        await client.send_message(chat_id=own, text=f"User: `{user.first_name} {user.last_name or ' '}`\nID: `{user.id}`\nUsername: {f"@{user.username}" if user.username else f"[{user.first_name}](tg://user?id={user.id})"}\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
+        await message.forward(chat_id=OWNER)
+        await client.send_message(chat_id=OWNER, text=f"User: `{user.first_name} {user.last_name or ' '}`\nID: `{user.id}`\nUsername: {f"@{user.username}" if user.username else f"[{user.first_name}](tg://user?id={user.id})"}\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
     except Exception as e:
-        await client.send_message(chat_id=own, text=f"Failed sending message from user {user_id}: {e}")
+        await client.send_message(chat_id=OWNER, text=f"Failed sending message from user {user_id}: {e}")
         log_error(f"Failed sending message from user {user_id}: {e}")
 
 
@@ -364,8 +368,8 @@ async def show_menu(client, message: Message, week="corrent"):
 
 @app.on_message(filters.private)
 async def res(client, message: Message):
-    if not auth(message, "user"): return
     log_command(message)
+    if not auth(message, "user"): return
 
     if message.text:
         match message.text:
