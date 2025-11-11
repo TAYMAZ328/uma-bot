@@ -60,6 +60,36 @@ async def start(client, message: Message):
     await show_keyboard(client, message)
 
 
+@app.on_message(filters.command("help"))
+async def help(client, message: Message):
+    if not auth(message): return
+
+    await message.reply_text("""
+/code [captcha code]
+/admin [0: dismiss | 1: promote] [user ID] promote and dismiss admin
+/user [ID | Username] User info
+/users All users list
+/admins All admins list
+/bans All banned users list
+/ban [user ID] ban User
+/unban [user ID] Unban User
+/update  Update menu
+/broadcast send message to all users
+/direct send direct message to a user
+/logs [Null/ number of logs] Export logs
+/help""")
+
+
+@app.on_message(filters.command("update"))
+async def updater(client, message: Message):
+    if not auth(message): return
+    log_command(message)
+
+    await message.reply_text("Updating started")
+    path = login.get_cap()
+    await message.reply_document(path, caption="CAPTCHA")
+
+
 @app.on_message(filters.command("code"))
 async def get_captcha(client, message: Message):
     if not auth(message): return
@@ -80,26 +110,6 @@ async def get_captcha(client, message: Message):
     menu.update()
 
     await message.reply_text("Weeks are updated.")
-
-
-@app.on_message(filters.command("help"))
-async def help(client, message: Message):
-    if not auth(message): return
-
-    await message.reply_text("""
-/code [captcha code]
-/admin [0: dismiss | 1: promote] [user ID] promote and dismiss admin
-/user [ID | Username] User info
-/users All users list
-/admins All admins list
-/bans All banned users list
-/ban [user ID] ban User
-/unban [user ID] Unban User
-/update  Update menu
-/broadcast send message to all users
-/direct send direct message to a user
-/logs [Null/ number of logs] Export logs
-/help""")
 
 
 @app.on_message(filters.command("direct"))
@@ -128,14 +138,6 @@ async def direct(client, message: Message):
         log_error(f"Failed sending message to user {user_id}: {e}")
 
 
-@app.on_message(filters.command("kill"))
-async def shutdown(client, message: Message):
-    if not auth(message): return
-    log_command(message)
-    await message.reply_text("Force shutdown...")
-    os._exit(0)
-
-
 @app.on_message(filters.command("broadcast"))
 async def broadcast(client, message: Message):
     if not auth(message): return
@@ -157,34 +159,12 @@ async def broadcast(client, message: Message):
     await message.edit_text("Broadcast complete")
 
 
-async def broadcast_res():
-    users_id = db.users_list()
-    for user in users_id:
-        try:
-            await app.send_message(chat_id=user, text="سلف یادت نره!")
-            await asyncio.sleep(0.2)
-        except Exception as e:
-            log_error(f"Failed sending to {user}: {e}")
-
-
-async def remind_update():
-    admins = db.admins_list()
-    for adm in admins:
-        try:
-            await app.send_message(chat_id=adm, text="UPDATE TIME!")
-            await asyncio.sleep(0.2)
-        except Exception as e:
-            log_error(f"Failed sending to Admin {adm}: {e}")
-
-
-@app.on_message(filters.command("update"))
-async def updater(client, message: Message):
+@app.on_message(filters.command("kill"))
+async def shutdown(client, message: Message):
     if not auth(message): return
     log_command(message)
-
-    await message.reply_text("Updating started")
-    path = login.get_cap()
-    await message.reply_document(path, caption="CAPTCHA")
+    await message.reply_text("Force shutdown...")
+    os._exit(0)
 
 
 @app.on_message(filters.command("unban"))
@@ -251,26 +231,6 @@ async def admins(client, message: Message):
     await message.reply_document(os.path.join("files", "admins.csv"), caption=f"[ {admins_num} ] Admins have been promoted so far")
 
 
-@app.on_message(filters.command("logs"))
-async def user_info(client, message: Message):
-    if not auth(message): return
-    log_command(message)
-
-    if len(message.command) == 1:
-        await message.reply_document(os.path.join("files", "commands.log"), caption=f"All logs")
-
-    elif len(message.command) == 2:
-        num = int(message.command[1]) * 4
-
-        with open(os.path.join("files", "commands.log"), 'r', encoding="utf-8") as f:
-            c = f.readlines()[-num:]
-
-        with open(os.path.join("files", "cmds.txt"), 'w', encoding="utf-8") as f:
-            f.writelines(c)
-    
-        await message.reply_document(os.path.join("files", "cmds.txt"), caption=f"[ {num} ] lones of log")
-
-
 @app.on_message(filters.command("user"))
 async def user_info(client, message: Message):
     if not auth(message): return
@@ -329,6 +289,26 @@ async def add_admin(client, message: Message):
             await message.reply_text("User not in Admin list")
 
 
+@app.on_message(filters.command("logs"))
+async def user_info(client, message: Message):
+    if not auth(message): return
+    log_command(message)
+
+    if len(message.command) == 1:
+        await message.reply_document(os.path.join("files", "commands.log"), caption=f"All logs")
+
+    elif len(message.command) == 2:
+        num = int(message.command[1]) * 4
+
+        with open(os.path.join("files", "commands.log"), 'r', encoding="utf-8") as f:
+            c = f.readlines()[-num:]
+
+        with open(os.path.join("files", "cmds.txt"), 'w', encoding="utf-8") as f:
+            f.writelines(c)
+    
+        await message.reply_document(os.path.join("files", "cmds.txt"), caption=f"[ {num} ] lones of log")
+
+
 async def none_cmd_msg(client, message):
     try:
         user_id = message.from_user.id
@@ -339,6 +319,26 @@ async def none_cmd_msg(client, message):
     except Exception as e:
         await client.send_message(chat_id=OWNER, text=f"Failed sending message from user {user_id}: {e}")
         log_error(f"Failed sending message from user {user_id}: {e}")
+
+
+async def broadcast_res():
+    users_id = db.users_list()
+    for user in users_id:
+        try:
+            await app.send_message(chat_id=user, text="سلف یادت نره!")
+            await asyncio.sleep(0.2)
+        except Exception as e:
+            log_error(f"Failed sending to {user}: {e}")
+
+
+async def remind_update():
+    admins = db.admins_list()
+    for adm in admins:
+        try:
+            await app.send_message(chat_id=adm, text="UPDATE TIME!")
+            await asyncio.sleep(0.2)
+        except Exception as e:
+            log_error(f"Failed sending to Admin {adm}: {e}")
 
 
 async def show_menu(client, message: Message, week="corrent"):
