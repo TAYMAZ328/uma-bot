@@ -41,7 +41,7 @@ uma-bot
 ├── extract.py
 ├── data/
 │   ├── pre.txt
-│   ├── corrent.txt
+│   ├── current.txt
 │   └── next.txt
 ├── files/
 │   ├── users.csv
