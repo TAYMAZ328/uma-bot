@@ -1,13 +1,14 @@
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time, csv, os
 
-def get_login():
-    with open(os.path.join("files", "tokens.csv"), "r") as f:
-        c = csv.reader(f)
-        c = list(c)[1]
-        return c[0].strip(), c[1].strip()
+import time, os
+from dotenv import load_dotenv
+
+load_dotenv()
+user = os.getenv("USER")
+psw = os.getenv("PSW")
+
 
 def get_cap():
     # Open browser
@@ -25,8 +26,6 @@ def get_cap():
     return path
 
 def login(captcha):
-    user, psw = get_login()
-
     driver.find_element(By.NAME, 'username').send_keys(user)
     driver.find_element(By.NAME, 'password').send_keys(psw)
     driver.find_element(By.NAME, 'Captcha').send_keys(captcha)

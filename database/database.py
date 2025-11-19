@@ -1,6 +1,8 @@
 from mysql.connector import connect, Error
 from datetime import datetime
 import csv, logging, os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 class DB:
@@ -73,7 +75,7 @@ class DB:
             try:
                 cur.execute(f"INSERT INTO users (id, access_hash, name, username, phone, date) VALUES (%s, %s, %s, %s, %s, %s)", data)
                 con.commit()
-            except: # if User already exists
+            except:
                 pass
 
 
@@ -233,37 +235,18 @@ class DB:
     def log_error(self, error):
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(os.path.join("files", "errors.log"), "a") as f:
-            f.write(f"[{date}]\n{error}\n")
+            f.write(f"Error database: [{date}]\n{error}\n")
         logging.error(error)
     
     def edit(self):
         pass
 
 
-def get_db():
-    with open(os.path.join("files", "tokens.csv"), "r") as f:
-        c = csv.reader(f)
-        c = list(c)[2]
-        return c[0].strip(), c[1].strip(), c[2].strip(), c[3].strip()
-
-
 if __name__ == "__main__":
-    HOST, USERNAME, PASSWORD, DB_NAME = get_db()
+    HOST = os.getenv("HOST")
+    USERNAME = os.getenv("USERNAME")
+    PASSWORD = os.getenv("PASSWORD")
+    DB_NAME = os.getenv("DB_NAME")
     db = DB(host=HOST, username=USERNAME, password=PASSWORD, db_name=DB_NAME)
     db.connect_db()
-    # db.create_db()
-    # db.show_dbs()
-    # db.create_user_table()
-    # db.create_admins_table()
-    # db.create_bans_table()
-    # db.show_table()
-    # db.select_admins()
-    # db.select_bans()
     print("ALL DONE")
-
-# inp = input()
-# while inp != '0':
-#     eval(f"db.{inp}")
-#     inp = input()
-
-

@@ -1,7 +1,8 @@
-__pycache__/
+*.pyc
+*.csv
+logs/*.txt
+menu_data/*.txt
+*.log
+.env
 *.session
 *.session-journal
-*.csv
-files/*.txt
-data/*.txt
-*.log

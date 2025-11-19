@@ -34,22 +34,53 @@ A Telegram bot that automatically scrapes data from university websites, process
 ## Project Structure
 ```bash
 uma-bot
-├── bot.py
-├── database.py
-├── login.py
-├── scrap.py
-├── extract.py
-├── data/
-│   ├── pre.txt
-│   ├── current.txt
-│   └── next.txt
+├── bot/
+│   ├── __init__.py
+│   ├── admin_pannel/
+│       ├── __init__.py
+│       ├── admin.py
+│       ├── user.py
+│       ├── ban.py
+│       ├── messaging.py
+│       └── exportlogs.py
+│   ├── app.py
+│   ├── bot.py
+│   ├── clock.py
+│   ├── config.py
+│   ├── handler.py
+│   ├── menu.py
+│   ├── scheduler.py
+│   ├── reminder.py
+│   ├── updater.py
+│   └── util.py
+│
+├── scraper/
+│   ├── __init__.py
+│   ├── login.py
+│   ├── scrap.py
+│   └── extract.py
+│
+├── database/
+│   ├── __init__.py
+│   └── database.py
+│
 ├── files/
 │   ├── users.csv
 │   ├── admins.csv
-│   ├── banned_users.csv
+│   └── banned_users.csv
+│
+├── menu_data/
+│   ├── pre.txt
+│   ├── current.txt
+│   └── next.txt
+│
+├── logs/
 │   ├── commands.log
-│   ├── errors.log
-│   └── token.csv
+│   ├── cmds.log
+│   └── errors.log
+│
+├── main.py
+├── .env
 ├── requirements.txt
 └── README.md
 ```
