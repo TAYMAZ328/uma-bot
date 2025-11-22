@@ -1,3 +1,4 @@
+from pyrogram.errors import UserIsBlocked
 from pyrogram.types import Message
 from pyrogram import filters
 
@@ -5,7 +6,7 @@ import asyncio
 
 from bot.util import log_command, log_error, auth
 from bot.app import app
-from bot.config import db
+from bot.config import db, OWNER
 
 
 
@@ -30,6 +31,9 @@ async def direct(_, message: Message):
     try:
         await msg.copy(chat_id=user_id)
         await message.reply_text("Sent")
+
+    except UserIsBlocked:
+        await app.send_message(chat_id=OWNER, text=f"User: `{user_id}` has blocked the bot.")
     except Exception as e:
         await message.reply_text(f"Failed sending message to user {user_id}: {e}")
         log_error(f"Failed sending message to user {user_id}: {e}")
@@ -51,6 +55,9 @@ async def broadcast(_, message: Message):
         try:
             await msg.copy(chat_id=user)
             await asyncio.sleep(0.5)
+
+        except UserIsBlocked:
+            await app.send_message(chat_id=OWNER, text=f"User: `{user}` has blocked the bot.")
         except Exception as e:
             await message.reply_text(f"Failed sending message to user {user}: {e}")
             log_error(f"Failed sending message to user {user}: {e}")
