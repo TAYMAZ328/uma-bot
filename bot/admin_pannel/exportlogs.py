@@ -24,7 +24,7 @@ async def user_info(_, message: Message):
             with open(os.path.join("logs", "cmds.txt"), 'w', encoding="utf-8") as f:
                 f.writelines(c)
         
-            await message.reply_document(os.path.join("logs", "cmds.txt"), caption=f"[ {num} ] lones of log")
+            await message.reply_document(os.path.join("logs", "cmds.txt"), caption=f"[ {num} ] lines of log")
 
     except Exception as e:
         log_error(f"Failed exporting logs: {message.text}\n{e}")
