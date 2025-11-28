@@ -43,15 +43,21 @@ uma-bot
 │       ├── ban.py
 │       ├── messaging.py
 │       └── exportlogs.py
+│
+│   ├── handlers/
+│       ├── __init__.py
+│       ├── bot.py
+│       ├── handler.py
+│       ├── updater.py
+│       ├── self_menu.py
+│       └── unknown_msg.py
 │   ├── app.py
-│   ├── bot.py
 │   ├── clock.py
 │   ├── config.py
-│   ├── handler.py
 │   ├── menu.py
+│   ├── keyboards.py
 │   ├── scheduler.py
 │   ├── reminder.py
-│   ├── updater.py
 │   └── util.py
 │
 ├── scraper/
