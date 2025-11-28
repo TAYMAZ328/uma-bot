@@ -9,7 +9,7 @@ from bot.app import app
 
 
 
-@app.on_message(filters.command("user"))
+@app.on_message(filters.command("user") & filters.private)
 async def user_info(client, message: Message):
     if not auth(message): return
     log_command(message)
@@ -49,7 +49,7 @@ async def user_info(client, message: Message):
         log_error(f"User info Error: {e}")
 
 
-@app.on_message(filters.command("users"))
+@app.on_message(filters.command("users") | filters.regex("^/users ⭐$"))
 async def all_user_info(_, message: Message):
     if not auth(message): return
     log_command(message)
