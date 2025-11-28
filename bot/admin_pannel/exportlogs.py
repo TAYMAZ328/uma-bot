@@ -7,12 +7,12 @@ from bot.util import log_command, log_error, auth
 from bot.app import app
 
 
-@app.on_message(filters.command("logs") | filters.regex("^/logs 🧾$") & filters.private)
+@app.on_message(filters.command("logs") | filters.regex("^🧾 logs$") & filters.private)
 async def user_info(_, message: Message):
     if not auth(message): return
     log_command(message)
     try:
-        if len(message.command) == 1:
+        if not message.command or len(message.command) == 1:
             await message.reply_document(os.path.join("logs", "commands.log"), caption=f"All logs")
 
         elif len(message.command) == 2:

@@ -48,7 +48,7 @@ async def add_admin(_, message: Message):
         log_error(f"Failed promote/dismiss admin: {message.text}\n{e}")
 
 
-@app.on_message(filters.command("admins") | filters.regex("^/admins 👤$") & filters.private)
+@app.on_message(filters.command("admins") | filters.regex("^👤 admins$") & filters.private)
 async def admins(_, message: Message):
     if not auth(message): return
     log_command(message)

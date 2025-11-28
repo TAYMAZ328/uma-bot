@@ -55,7 +55,7 @@ async def ban_user(_, message: Message):
         log_error(f"Failed ban user: {message.text}\n{e}")
 
 
-@app.on_message(filters.command("bans") | filters.regex("^/bans 🚫$"))
+@app.on_message(filters.command("bans") | filters.regex("^🚫 bans$"))
 async def banned_users(_, message: Message):
     if not auth(message): return
     log_command(message)

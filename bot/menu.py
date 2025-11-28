@@ -1,11 +1,11 @@
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.types import Message, CallbackQuery
 from pyrogram.errors import MessageNotModified
 
-from scraper import extract
+from bot.keyboards import KEYBOARDS
 from bot.clock import IranClock
-from bot.app import app
+from scraper import extract
 from bot.util import auth
-
+from bot.app import app
 
 menu = extract.Menu()
 menu.update()
@@ -15,26 +15,8 @@ ic = IranClock()
 
 
 async def show_menu(_, message: Message, week="current"):
-
-    key_menu = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("⏪ هفته قبل", callback_data="pre"),
-            InlineKeyboardButton("📅 هفته جاری", callback_data="current"),
-            InlineKeyboardButton("⏩ هفته بعد", callback_data="next"),
-        ],
-        [
-            InlineKeyboardButton("❌ بستن منو", callback_data="close"),
-        ]
-    ])
-
-    cnt = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("📅 هفته جاری", callback_data="current"),
-        ],
-        [
-            InlineKeyboardButton("❌ بستن منو", callback_data="close"),
-        ]
-    ])
+    key_menu = KEYBOARDS["menu_btn"]
+    cnt = KEYBOARDS["current_btn"]
 
     try:
         match week:
@@ -48,16 +30,7 @@ async def show_menu(_, message: Message, week="current"):
         pass
 
 async def show_cnt(_, message: Message):
-    key_menu = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("⏪ هفته قبل", callback_data="pre"),
-            InlineKeyboardButton("📅 هفته جاری", callback_data="current"),
-            InlineKeyboardButton("⏩ هفته بعد", callback_data="next")
-        ],
-        [
-            InlineKeyboardButton("❌ بستن منو", callback_data="close")
-        ]
-    ])
+    key_menu = KEYBOARDS["menu_btn"]
 
     await message.reply_text(f"{ic.get_datetime()}{menu.current}", reply_markup=key_menu)
 
