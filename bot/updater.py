@@ -9,7 +9,7 @@ from bot.app import app
 
 
 
-@app.on_message(filters.command("update"))
+@app.on_message(filters.command("update") | filters.regex("^/update 🔄️$") & filters.private)
 async def updater(_, message: Message):
     if not auth(message): return
     log_command(message)
@@ -19,7 +19,7 @@ async def updater(_, message: Message):
     await message.reply_document(path, caption="CAPTCHA")
 
 
-@app.on_message(filters.command("code"))
+@app.on_message(filters.command("code") & filters.private)
 async def get_captcha(_, message: Message):
     if not auth(message): return
     log_command(message)

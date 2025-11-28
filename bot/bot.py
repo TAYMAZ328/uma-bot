@@ -1,4 +1,4 @@
-from pyrogram.types import Message
+from pyrogram.types import Message, ReplyKeyboardMarkup
 from pyrogram import filters
 
 from bot.util import log_command, log_error, auth
@@ -7,26 +7,36 @@ from bot.config import db
 from bot.app import app
 
 
-@app.on_message(filters.command('start'))
+@app.on_message(filters.command('start') & filters.private)
 async def start(client, message: Message):
     if not auth(message, "user"): return
     log_command(message)
     try:
-        user = message.from_user
-        peer = await client.resolve_peer(user.id)
-        access_hash = peer.access_hash
-
-        db.insert_user(user, access_hash)
-
-        await show_keyboard(client, message)
+        if auth(message):
+            await show_keyboard(client, message, role="admin")
+        else:
+            user = message.from_user
+            peer = await client.resolve_peer(user.id)
+            access_hash = peer.access_hash
+            db.insert_user(user, access_hash)
+            await show_keyboard(client, message)
 
     except Exception as e:
         log_error(f"Failed starting bot: user {message.from_user.id}: {message.text}\n{e}")
 
 
-@app.on_message(filters.command("help"))
+@app.on_message(filters.command("help") | filters.regex("^/Admin$") & filters.private)
 async def help(_, message: Message):
     if not auth(message): return
+
+    keyboard = ReplyKeyboardMarkup(
+        [
+            ["/update 🔄️", "/logs 🧾"],
+            ["/users ⭐", "/admins 👤", "/bans 🚫"],
+            ["/Back ⬅️"]
+        ],
+        resize_keyboard=True
+    )
 
     await message.reply_text("""
 **🤖 Available Bot Commands**
@@ -54,4 +64,10 @@ async def help(_, message: Message):
 **🧾 Logs**
 `/logs [number]` — Export logs (default: all)
 """
-)
+, reply_markup=keyboard, quote=True)
+
+
+@app.on_message(filters.regex("^/Back ⬅️$") | filters.private)
+async def back_to_start(client, message: Message):
+    if auth(message):
+        await show_keyboard(client, message, role="admin")

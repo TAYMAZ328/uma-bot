@@ -10,7 +10,7 @@ from bot.config import db, OWNER
 
 
 
-@app.on_message(filters.command("direct"))
+@app.on_message(filters.command("direct") & filters.private)
 async def direct(_, message: Message):
     if not auth(message): return
     log_command(message)
